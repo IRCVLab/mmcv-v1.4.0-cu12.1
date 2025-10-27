@@ -2,16 +2,15 @@
 // Modified from
 // https://github.com/hszhao/semseg/blob/master/lib/psa/src
 
-#include <THC/THC.h>
+#include <torch/extension.h>
 #include <torch/serialize/tensor.h>
-
-#include <THC/THCDeviceUtils.cuh>
+#include <ATen/cuda/CUDAContext.h>
 
 #include "psamask_cuda_kernel.cuh"
 #include "pytorch_cuda_helper.hpp"
 
-void PSAMaskForwardCUDAKernelLauncher(const int psa_type, const Tensor input,
-                                      Tensor output, const int num_,
+void PSAMaskForwardCUDAKernelLauncher(const int psa_type, const at::Tensor input,
+                                      at::Tensor output, const int num_,
                                       const int h_feature, const int w_feature,
                                       const int h_mask, const int w_mask,
                                       const int half_h_mask,
@@ -38,7 +37,7 @@ void PSAMaskForwardCUDAKernelLauncher(const int psa_type, const Tensor input,
 }
 
 void PSAMaskBackwardCUDAKernelLauncher(
-    const int psa_type, const Tensor grad_output, Tensor grad_input,
+    const int psa_type, const at::Tensor grad_output, at::Tensor grad_input,
     const int num_, const int h_feature, const int w_feature, const int h_mask,
     const int w_mask, const int half_h_mask, const int half_w_mask) {
   int nthreads = num_ * h_feature * w_feature;
