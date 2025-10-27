@@ -133,6 +133,7 @@ except ImportError:
 
 def get_extensions():
     extensions = []
+    cxx_std = os.environ.get("CXX_STD", "c++17")
 
     if os.getenv('MMCV_WITH_TRT', '0') != '0':
         ext_name = 'mmcv._ext_trt'
@@ -191,8 +192,8 @@ def get_extensions():
         include_dirs.append(os.path.abspath('./mmcv/ops/csrc/common/cuda'))
         cuda_args = os.getenv('MMCV_CUDA_ARGS')
         extra_compile_args = {
-            'nvcc': [cuda_args] if cuda_args else [],
-            'cxx': [],
+            'nvcc': [cuda_args, f'-std={cxx_std}'] if cuda_args else [f'-std={cxx_std}'],
+            'cxx': [f'-std={cxx_std}']
         }
         if torch.cuda.is_available() or os.getenv('FORCE_CUDA', '0') == '1':
             define_macros += [('MMCV_WITH_CUDA', None)]
@@ -241,7 +242,7 @@ def get_extensions():
         # to compile those cpp files, so there is no need to add the
         # argument
         if platform.system() != 'Windows':
-            extra_compile_args['cxx'] = ['-std=c++14']
+            extra_compile_args['cxx'] = [f'-std={cxx_std}']
 
         include_dirs = []
 
@@ -298,7 +299,7 @@ def get_extensions():
         # to compile those cpp files, so there is no need to add the
         # argument
         if 'nvcc' in extra_compile_args and platform.system() != 'Windows':
-            extra_compile_args['nvcc'] += ['-std=c++14']
+            extra_compile_args['nvcc'] += [f'-std={cxx_std}']
 
         ext_ops = extension(
             name=ext_name,
