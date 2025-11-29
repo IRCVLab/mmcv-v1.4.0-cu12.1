@@ -45,7 +45,14 @@ class MMDistributedDataParallel(DistributedDataParallel):
                 logger='mmcv')
 
         if getattr(self, 'require_forward_param_sync', True):
-            self._sync_params()
+            sync_params = getattr(self, '_sync_params', None)
+            if sync_params is not None:
+                sync_params()
+            else:
+                # PyTorch >= 2.1 removed `_sync_params`; parameter broadcast now
+                # happens inside DistributedDataParallel._pre_forward.
+                # Nothing to do here for newer versions.
+                pass
         if self.device_ids:
             inputs, kwargs = self.scatter(inputs, kwargs, self.device_ids)
             if len(self.device_ids) == 1:
